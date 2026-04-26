@@ -130,19 +130,27 @@ function generate() {
     for (let j = 0; j < 12; j++) {
         let picked = null;
         
+        // Strategy: Search from 5-word context down to 1
         for (let lookback = Math.min(windowMem.length, 5); lookback >= 1; lookback--) {
             let key = windowMem.slice(-lookback).join("_");
             let options = window.brainWeights[key] || {};
             let choices = Object.keys(options);
             
             if (choices.length > 0) {
-                // THE FUZZY LOGIC: 80% chance for the "Best" word, 20% for a "Random" one
-                if (Math.random() > 0.2) {
-                    picked = choices.sort((a, b) => options[b] - options[a])[0];
-                } else {
-                    picked = choices[Math.floor(Math.random() * choices.length)];
-                }
+                // Pick the best weighted word
+                picked = choices.sort((a, b) => options[b] - options[a])[0];
                 break;
+            }
+        }
+
+        // CRITICAL FIX: If no match is found, try to jump-start using any word from the user's prompt
+        if (!picked && j === 0) {
+            for (let word of words) {
+                if (window.brainWeights[word]) {
+                    let fallbacks = Object.keys(window.brainWeights[word]);
+                    picked = fallbacks.sort((a, b) => window.brainWeights[word][b] - window.brainWeights[word][a])[0];
+                    break;
+                }
             }
         }
 
@@ -153,7 +161,7 @@ function generate() {
         } else break;
     }
     
-    addLog("Johan", res.join(" ") || "...");
+    addLog("Johan", res.join(" ") || "I don't know that path yet...");
     updateHeatmap();
     document.getElementById('user-in').value = "";
 }
