@@ -2,60 +2,100 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Johan v25.5: grown man with a mustahce edition</title>
+    <title>Johan v26.0: The Super-Brain Edition</title>
     <style>
-        :root { --bg: #050505; --neon: #00ffcc; --text: #d1d1d1; --accent: #bb86fc; --dark: #111; }
+        :root { --bg: #050505; --neon: #00ffcc; --text: #d1d1d1; --accent: #bb86fc; --dark: #111; --good: #28a745; --bad: #dc3545; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; height: 100vh; overflow: hidden; }
-        #sidebar { width: 400px; background: var(--dark); padding: 15px; border-right: 1px solid #333; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-        .panel { background: #161616; padding: 10px; border-radius: 6px; border: 1px solid #222; }
-        .panel-label { font-size: 9px; color: #888; text-transform: uppercase; margin-bottom: 5px; display: block; font-weight: bold; }
-        #heatmap { height: 300px; overflow-y: auto; background: #000; padding: 8px; border: 1px solid #333; font-family: monospace; font-size: 10px; }
-        #chat { flex: 1; display: flex; flex-direction: column; padding: 20px; background: #0a0a0a; }
-        #log { flex: 1; overflow-y: auto; background: rgba(0,0,0,0.5); border-radius: 8px; padding: 15px; margin-bottom: 15px; border: 1px solid #222; }
-        .msg { margin-bottom: 10px; padding-left: 10px; border-left: 3px solid #444; }
-        .user { border-left-color: var(--neon); color: var(--neon); }
-        .ai { border-left-color: var(--accent); color: var(--accent); font-weight: bold; }
-        input { background: #000; color: var(--neon); border: 1px solid #333; padding: 15px; font-family: monospace; border-radius: 8px; width: 100%; box-sizing: border-box; font-size: 16px; }
-        button { background: var(--neon); color: black; border: none; padding: 10px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        
+        /* Side Panel */
+        #sidebar { width: 450px; background: var(--dark); padding: 15px; border-right: 1px solid #333; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+        .panel { background: #161616; padding: 12px; border-radius: 8px; border: 1px solid #222; }
+        .panel-label { font-size: 10px; color: #888; text-transform: uppercase; margin-bottom: 8px; display: block; font-weight: bold; letter-spacing: 1px; }
+        
+        /* Heatmap & Logs */
+        #heatmap { height: 200px; overflow-y: auto; background: #000; padding: 8px; border: 1px solid #333; font-family: 'Consolas', monospace; font-size: 11px; color: #aaa; }
+        #change-log { height: 80px; overflow-y: auto; background: #080808; font-size: 10px; color: var(--accent); padding: 5px; border: 1px solid #222; }
+        
+        /* Chat UI */
+        #chat { flex: 1; display: flex; flex-direction: column; padding: 25px; background: #0a0a0a; position: relative; }
+        #log { flex: 1; overflow-y: auto; background: rgba(0,0,0,0.3); border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid #222; box-shadow: inset 0 0 20px #000; }
+        .msg { margin-bottom: 15px; line-height: 1.5; padding: 10px; border-radius: 8px; max-width: 80%; }
+        .user { background: #1a1a1a; color: var(--neon); align-self: flex-end; border-bottom-right-radius: 2px; border: 1px solid #333; }
+        .ai { background: #121212; color: var(--accent); align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid #333; font-weight: 500; }
+
+        /* Controls */
+        .controls { display: flex; gap: 10px; margin-bottom: 15px; }
+        input { background: #000; color: var(--neon); border: 1px solid #333; padding: 15px; font-family: monospace; border-radius: 8px; width: 100%; box-sizing: border-box; font-size: 16px; outline: none; }
+        input:focus { border-color: var(--neon); }
+        button { cursor: pointer; border: none; border-radius: 6px; font-weight: bold; transition: 0.2s; }
+        .btn-fire { background: var(--neon); color: black; padding: 0 30px; }
+        .btn-reward { background: var(--good); color: white; flex: 1; padding: 10px; }
+        .btn-punish { background: var(--bad); color: white; flex: 1; padding: 10px; }
     </style>
 </head>
 <body>
 
 <div id="sidebar">
-    <h3 style="color: var(--neon); margin: 0;">🧠 JOHAN v25.5</h3>
+    <h2 style="color: var(--neon); margin: 0; display: flex; align-items: center; gap: 10px;">
+        <span>🧠</span> JOHAN v26.0
+    </h2>
+
     <div class="panel">
-        <span class="panel-label">🔥 Heatmap</span>
-        <div id="heatmap">No data...</div>
+        <span class="panel-label">🔧 Behavior Rules</span>
+        <input type="text" id="rule-box" value="limit 1 sentence_stop" style="padding: 8px; font-size: 12px;">
     </div>
-    <button onclick="window.location.reload()" style="background:#444; color:white;">🔄 Refresh & Wipe</button>
+
+    <div class="panel">
+        <span class="panel-label">📈 Logic Heatmap</span>
+        <div id="heatmap">Waiting for input...</div>
+    </div>
+
+    <div class="panel">
+        <span class="panel-label">📜 System Logs</span>
+        <div id="change-log">Engine initialized.</div>
+    </div>
+
+    <div class="panel" style="display:flex; gap: 5px;">
+        <button onclick="exportBrain()" style="background:#333; color:white; font-size: 10px; flex:1;">EXPORT</button>
+        <button onclick="importBrain()" style="background:#333; color:white; font-size: 10px; flex:1;">IMPORT</button>
+        <button onclick="location.reload()" style="background:#522; color:white; font-size: 10px; flex:1;">WIPE</button>
+    </div>
 </div>
 
 <div id="chat">
     <div id="log"></div>
+
+    <div class="controls">
+        <button class="btn-reward" onclick="adjustWeight(2.0)">✅ GOOD RESPONSE</button>
+        <button class="btn-punish" onclick="adjustWeight(0.5)">❌ BAD RESPONSE</button>
+    </div>
+
     <div style="display:flex; gap:10px;">
-        <input type="text" id="user-in" placeholder="Ask your creation something..." onkeypress="if(event.key==='Enter') generate()">
-        <button onclick="generate()">SEND</button>
+        <input type="text" id="user-in" placeholder="Talk to Johan..." onkeypress="if(event.key==='Enter') generate()">
+        <button class="btn-fire" onclick="generate()">FIRE</button>
     </div>
 </div>
 
 <script>
     window.brainWeights = {};
+    window.lastPath = [];
 
-    window.bulkLearn = function(textArray) {
-        textArray.forEach(sentence => {
-            // Logic: Treat punctuation as individual words
-            let words = sentence.toLowerCase().replace(/([.!?])/g, " $1 ").split(/\s+/).filter(w=>w);
-            for (let size = 1; size <= 5; size++) {
-                for (let i = 0; i <= words.length - size; i++) {
-                    let context = words.slice(i, i + size).join("_");
-                    let nextWord = words[i + size];
-                    if (nextWord) {
-                        if (!window.brainWeights[context]) window.brainWeights[context] = {};
-                        window.brainWeights[context][nextWord] = (window.brainWeights[context][nextWord] || 0) + 10;
+    // BULK LEARNER: Handles grammar & punctuation automatically
+    window.bulkLearn = function(data) {
+        data.forEach(text => {
+            let tokens = text.toLowerCase().replace(/([.!?])/g, " $1 ").split(/\s+/).filter(w => w);
+            for (let n = 1; n <= 5; n++) {
+                for (let i = 0; i <= tokens.length - n; i++) {
+                    let ctx = tokens.slice(i, i + n).join("_");
+                    let next = tokens[i + n];
+                    if (next) {
+                        if (!window.brainWeights[ctx]) window.brainWeights[ctx] = {};
+                        window.brainWeights[ctx][next] = (window.brainWeights[ctx][next] || 0) + 5;
                     }
                 }
             }
         });
+        logSystem("Absorbed " + data.length + " new concepts.");
         updateHeatmap();
     };
 
@@ -64,60 +104,92 @@
         if(!input) return;
         addLog("User", input);
         
-        let words = input.replace(/([.!?])/g, " $1 ").split(/\s+/).filter(w => w);
+        let tokens = input.replace(/([.!?])/g, " $1 ").split(/\s+/).filter(w => w);
         let res = [];
-        let windowMem = words.slice(-5);
+        let memory = tokens.slice(-5);
+        window.lastPath = [];
 
-        for (let j = 0; j < 15; j++) {
-            let picked = null;
-            for (let lookback = Math.min(windowMem.length, 5); lookback >= 1; lookback--) {
-                let key = windowMem.slice(-lookback).join("_");
+        for (let i = 0; i < 20; i++) {
+            let bestWord = null;
+            
+            // Contextual Search (5-word down to 1-word)
+            for (let size = Math.min(memory.length, 5); size >= 1; size--) {
+                let key = memory.slice(-size).join("_");
                 let options = window.brainWeights[key] || {};
-                let choices = Object.keys(options).sort((a, b) => options[b] - options[a]);
                 
-                for (let c of choices) {
-                    if (res.includes(c) && !".!?".includes(c)) continue; // Internal "Limit 1" Rule
-                    picked = c; break;
-                }
-                if (picked) break;
-            }
-
-            // Fallback Jump-start
-            if (!picked && j === 0) {
-                for(let w of words) if(window.brainWeights[w]) { 
-                    picked = Object.keys(window.brainWeights[w])[0]; break; 
+                // Logic: Sort by weight but filter out repeats
+                let sorted = Object.keys(options).sort((a, b) => options[b] - options[a]);
+                bestWord = sorted.find(w => !res.includes(w) || ".!?".includes(w));
+                
+                if (bestWord) {
+                    window.lastPath.push({ctx: key, word: bestWord});
+                    break;
                 }
             }
 
-            if (picked) {
-                res.push(picked);
-                if (".!?".includes(picked)) break; // Stop at Punctuation
-                windowMem.push(picked);
-                if (windowMem.length > 5) windowMem.shift();
+            // Fallback: If stuck, grab a word related to the user's last word
+            if (!bestWord && i === 0) {
+                let fallbackKey = tokens[tokens.length-1];
+                if(window.brainWeights[fallbackKey]) {
+                    bestWord = Object.keys(window.brainWeights[fallbackKey])[0];
+                }
+            }
+
+            if (bestWord) {
+                res.push(bestWord);
+                if (".!?".includes(bestWord)) break;
+                memory.push(bestWord);
+                if (memory.length > 5) memory.shift();
             } else break;
         }
-        
+
         let output = res.join(" ").replace(/\s+([.!?])/g, "$1");
-        addLog("Johan", output || "...");
+        addLog("Johan", output.charAt(0).toUpperCase() + output.slice(1) || "I'm still learning that phrase.");
         document.getElementById('user-in').value = "";
+        updateHeatmap();
+    }
+
+    function adjustWeight(mult) {
+        window.lastPath.forEach(step => {
+            if(window.brainWeights[step.ctx]) {
+                window.brainWeights[step.ctx][step.word] *= mult;
+            }
+        });
+        logSystem("Weights adjusted by x" + mult);
+        updateHeatmap();
+    }
+
+    function logSystem(m) {
+        let l = document.getElementById('change-log');
+        l.innerHTML = `<div>> ${m}</div>` + l.innerHTML;
     }
 
     function addLog(s, t) {
         let l = document.getElementById('log');
         let d = document.createElement('div');
         d.className = `msg ${s.toLowerCase()}`;
-        d.innerHTML = `<strong>${s.toUpperCase()}:</strong> ${t}`;
-        l.appendChild(d); l.scrollTop = l.scrollHeight;
+        d.innerHTML = `<strong>${s.toUpperCase()}</strong><br>${t}`;
+        l.appendChild(d);
+        l.scrollTop = l.scrollHeight;
     }
 
     function updateHeatmap() {
-        const h = document.getElementById('heatmap'); h.innerHTML = "";
-        Object.keys(window.brainWeights).forEach(k => {
-            for(let next in window.brainWeights[k]) {
-                h.innerHTML += `<div>${k.replace(/_/g,' ')} -> ${next}</div>`;
+        let h = document.getElementById('heatmap');
+        h.innerHTML = "";
+        let keys = Object.keys(window.brainWeights).slice(-30); // Show last 30 for speed
+        keys.forEach(k => {
+            for(let n in window.brainWeights[k]) {
+                h.innerHTML += `<div>${k.replace(/_/g,' ')} <span style="color:var(--neon)">→</span> ${n}</div>`;
             }
         });
     }
+
+    function exportBrain() { prompt("Copy Brain Data:", JSON.stringify(window.brainWeights)); }
+    function importBrain() { 
+        let d = prompt("Paste Brain Data:");
+        if(d) { window.brainWeights = JSON.parse(d); updateHeatmap(); logSystem("Memory Restored."); }
+    }
 </script>
+
 </body>
 </html>
