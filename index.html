@@ -2,86 +2,65 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Johan v22.0: Complete Command Center</title>
+    <title>Johan v23.5: Multi-Order Command Center</title>
     <style>
         :root { --bg: #050505; --neon: #00ffcc; --text: #d1d1d1; --accent: #bb86fc; --dark: #111; --good: #28a745; --bad: #dc3545; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; height: 100vh; overflow: hidden; }
-        
-        /* SIDEBAR SECTIONS */
         #sidebar { width: 550px; background: var(--dark); padding: 15px; border-right: 1px solid #333; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
         .panel { background: #161616; padding: 10px; border-radius: 6px; border: 1px solid #222; }
         .panel-label { font-size: 9px; color: #888; text-transform: uppercase; margin-bottom: 5px; display: block; font-weight: bold; }
-        
-        /* HEATMAP & BOARD */
-        #heatmap { height: 180px; overflow-y: auto; background: #000; padding: 8px; border: 1px solid #333; font-family: monospace; font-size: 10px; }
-        #change-board { height: 100px; overflow-y: auto; background: #080808; padding: 8px; border: 1px solid #222; font-family: monospace; font-size: 10px; color: var(--neon); }
-        
+        #heatmap { height: 250px; overflow-y: auto; background: #000; padding: 8px; border: 1px solid #333; font-family: monospace; font-size: 10px; }
+        #change-board { height: 80px; overflow-y: auto; background: #080808; padding: 8px; border: 1px solid #222; font-family: monospace; font-size: 10px; color: var(--neon); }
         .heat-row { display: flex; justify-content: space-between; align-items: center; padding: 3px; border-bottom: 1px solid #222; }
-        .controls { display: flex; gap: 4px; }
-        
-        /* CHAT SECTION */
         #chat { flex: 1; display: flex; flex-direction: column; padding: 20px; background: #0a0a0a; }
         #log { flex: 1; overflow-y: auto; background: rgba(0,0,0,0.5); border-radius: 8px; padding: 15px; margin-bottom: 15px; border: 1px solid #222; }
         .msg { margin-bottom: 10px; padding-left: 10px; border-left: 3px solid #444; }
         .user { border-left-color: var(--neon); color: var(--neon); }
         .ai { border-left-color: var(--accent); color: var(--accent); font-weight: bold; }
-
-        /* BUTTONS */
-        button { cursor: pointer; border: none; border-radius: 4px; font-weight: bold; font-size: 9px; padding: 4px 8px; color: white; transition: 0.2s; }
-        .btn-good { background: var(--good); flex: 1; padding: 10px; }
-        .btn-bad { background: var(--bad); flex: 1; padding: 10px; }
-        .btn-util { background: #333; }
+        button { cursor: pointer; border: none; border-radius: 4px; font-weight: bold; font-size: 9px; padding: 6px 10px; color: white; }
+        .btn-good { background: var(--good); flex: 1; padding: 12px; }
+        .btn-bad { background: var(--bad); flex: 1; padding: 12px; }
         .btn-snip { background: #411; color: #f44; }
-        .btn-accent { background: var(--accent); color: black; }
-        
-        textarea, input { background: #000; color: var(--neon); border: 1px solid #333; padding: 8px; font-family: monospace; font-size: 11px; border-radius: 4px; width: 100%; box-sizing: border-box; }
+        textarea, input { background: #000; color: var(--neon); border: 1px solid #333; padding: 8px; font-family: monospace; border-radius: 4px; width: 100%; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
 <div id="sidebar">
-    <h3 style="color: var(--neon); margin: 0;">🧠 THE TOTAL LAB v22.0</h3>
+    <h3 style="color: var(--neon); margin: 0;">🧠 JOHAN v23.5: N-GRAM CORE</h3>
 
     <div class="panel">
         <span class="panel-label">⚖️ Global Rules</span>
-        <input type="text" id="rule-input" value="limit 1" placeholder="e.g. limit 1, ban is->my">
+        <input type="text" id="rule-input" value="limit 1" placeholder="ban python->fast">
     </div>
 
     <div class="panel">
-        <span class="panel-label">📈 Change Board (Last Transitions)</span>
+        <span class="panel-label">📈 Change Board</span>
         <div id="change-board">System Ready...</div>
     </div>
 
     <div class="panel">
-        <span class="panel-label">🔥 Synapse Heatmap (Snipping & Weights)</span>
+        <span class="panel-label">🔥 Context Heatmap (Clamped 1-5)</span>
         <div id="heatmap">No data...</div>
-    </div>
-
-    <div class="panel">
-        <span class="panel-label">💉 Precision Injection</span>
-        <div style="display:flex; gap:5px;">
-            <input type="text" id="correction-in" placeholder="Force word path...">
-            <button class="btn-accent" onclick="applyCorrection()">INJECT</button>
-        </div>
     </div>
 
     <div class="panel">
         <span class="panel-label">💾 Memory Core</span>
         <textarea id="data-io" style="height: 40px; margin-bottom:5px;" placeholder="JSON Data..."></textarea>
         <div style="display:flex; gap:5px;">
-            <button class="btn-util" onclick="exportBrain()">Export</button>
-            <button class="btn-util" onclick="importBrain()">Import</button>
-            <button class="btn-util" style="background:#400" onclick="resetBrain()">Wipe</button>
+            <button style="background:#333" onclick="exportBrain()">Export</button>
+            <button style="background:#333" onclick="importBrain()">Import</button>
+            <button style="background:#400" onclick="resetBrain()">Wipe</button>
         </div>
     </div>
 </div>
 
 <div id="chat">
-    <div id="log"><div class="msg system">v22.0 Fully Integrated. All training tools active.</div></div>
+    <div id="log"><div class="msg system">v23.5 Online. BulkLoader ready in Console. Context Window: 5 words.</div></div>
     
     <div style="display:flex; gap:10px; margin-bottom: 15px;">
-        <button class="btn-good" onclick="reward(1.8)">✅ REWARD (Good Logic)</button>
-        <button class="btn-bad" onclick="reward(0.4)">❌ PUNISH (Bad Path)</button>
+        <button class="btn-good" onclick="reward(2.0)">✅ REWARD (Reinforce Sequence)</button>
+        <button class="btn-bad" onclick="reward(0.2)">❌ PUNISH (Break Sequence)</button>
     </div>
 
     <div style="display:flex; gap:10px;">
@@ -91,33 +70,45 @@
 </div>
 
 <script>
-    let brainWeights = {}; 
-    let lastSentence = [];
-    let lastUserWord = "";
+    // CORE GLOBAL STATE
+    window.brainWeights = {}; 
+    window.lastSentenceKeys = []; 
+
+    // THE BULK LOADER
+    window.bulkLearn = function(textArray) {
+        textArray.forEach(sentence => {
+            let words = sentence.toLowerCase().replace(/[^\w\s]/g, "").trim().split(" ").filter(w=>w);
+            for (let size = 1; size <= 5; size++) {
+                for (let i = 0; i <= words.length - size; i++) {
+                    let context = words.slice(i, i + size).join("_");
+                    let nextWord = words[i + size];
+                    if (nextWord) {
+                        if (!window.brainWeights[context]) window.brainWeights[context] = {};
+                        window.brainWeights[context][nextWord] = (window.brainWeights[context][nextWord] || 1.0) + 2.0;
+                    }
+                }
+            }
+        });
+        logChange("Bulk training complete via console.");
+        updateHeatmap();
+    };
 
     function logChange(m) {
         const board = document.getElementById('change-board');
         board.innerHTML = `<div>[${new Date().toLocaleTimeString()}] ${m}</div>` + board.innerHTML;
     }
 
-    function perspective(word, toAI = true) {
-        const map = { "my": "your", "your": "my", "i": "you", "you": "i", "am": "are", "are": "am" };
-        return map[word] || word;
-    }
-
     function updateHeatmap() {
         const container = document.getElementById('heatmap');
         container.innerHTML = "";
-        Object.keys(brainWeights).forEach(p => {
-            Object.keys(brainWeights[p]).forEach(c => {
-                let w = brainWeights[p][c];
+        Object.keys(window.brainWeights).sort().forEach(p => {
+            Object.keys(window.brainWeights[p]).forEach(c => {
+                let w = window.brainWeights[p][c];
                 let row = document.createElement('div');
                 row.className = 'heat-row';
-                row.innerHTML = `<span>[${p}] → [${c}]</span>
-                    <div class="controls">
-                        <span style="color:${w > 3 ? '#ff4444' : '#44ff44'}">${w.toFixed(2)}</span>
-                        <button class="btn-util" onclick="adjust('${p}','${c}',1.2)">↑</button>
-                        <button class="btn-util" onclick="adjust('${p}','${c}',0.8)">↓</button>
+                row.innerHTML = `<span>[${p.replace(/_/g, ' ')}] → [${c}]</span>
+                    <div style="display:flex; gap:5px; align-items:center;">
+                        <span style="color:var(--neon)">${w.toFixed(1)}</span>
                         <button class="btn-snip" onclick="snip('${p}','${c}')">✂️</button>
                     </div>`;
                 container.appendChild(row);
@@ -125,94 +116,75 @@
         });
     }
 
-    function adjust(p, c, m) { brainWeights[p][c] *= m; updateHeatmap(); logChange(`Weighted ${p}->${c} to ${brainWeights[p][c].toFixed(2)}`); }
-    function snip(p, c) { delete brainWeights[p][c]; updateHeatmap(); logChange(`Snipped path ${p}->${c}`); }
+    function snip(p, c) { delete window.brainWeights[p][c]; updateHeatmap(); logChange(`Snipped: ${p}->${c}`); }
 
-// NEW CORE LOGIC: Clamped Variable-Order Lookback
-function generate() {
-    let input = document.getElementById('user-in').value.toLowerCase().trim();
-    if(!input) return;
-    addLog("User", input);
-    
-    let words = input.split(" ").filter(w => w);
-    lastUserWord = words[words.length - 1];
-    
-    // TRAINING: Store patterns from size 1 up to 5
-    for (let size = 1; size <= 5; size++) {
-        for (let i = 0; i <= words.length - size; i++) {
-            let context = words.slice(i, i + size).join("_");
-            let nextWord = words[i + size];
-            if (nextWord) {
-                if (!brainWeights[context]) brainWeights[context] = {};
-                brainWeights[context][nextWord] = (brainWeights[context][nextWord] || 1.0) + 0.2;
-            }
-        }
-    }
-
-    // INFERENCE: The "Back-off" Search
-    let sentence = [];
-    let currentWindow = words.slice(-5); // Get the last 5 words as starting context
-
-    for (let j = 0; j < 10; j++) {
-        let picked = null;
+    function generate() {
+        let input = document.getElementById('user-in').value.toLowerCase().trim();
+        if(!input) return;
+        addLog("User", input);
         
-        // Try looking back 5 words, then 4, 3, 2, 1...
-        for (let lookback = Math.min(currentWindow.length, 5); lookback >= 1; lookback--) {
-            let contextKey = currentWindow.slice(-lookback).join("_");
-            let options = brainWeights[contextKey] || {};
-            let sorted = Object.keys(options).sort((a, b) => options[b] - options[a]);
-            
-            if (sorted.length > 0) {
-                picked = sorted[0];
-                break; // Found the best match for the longest possible context!
+        let words = input.replace(/[^\w\s]/g, "").split(" ").filter(w => w);
+        
+        // LEARN FROM INPUT
+        for (let size = 1; size <= 5; size++) {
+            for (let i = 0; i <= words.length - size; i++) {
+                let context = words.slice(i, i + size).join("_");
+                let nextWord = words[i + size];
+                if (nextWord) {
+                    if (!window.brainWeights[context]) window.brainWeights[context] = {};
+                    window.brainWeights[context][nextWord] = (window.brainWeights[context][nextWord] || 1.0) + 0.5;
+                }
             }
         }
 
-        if (picked) {
-            sentence.push(picked);
-            currentWindow.push(picked);
-            if (currentWindow.length > 5) currentWindow.shift(); // Keep the window clamped to 5
-        } else break;
-    }
-    
-    addLog("Johan", sentence.join(" ") || "...");
-    updateHeatmap();
-}
+        // GENERATE RESPONSE
+        let res = [];
+        let windowMem = words.slice(-5);
+        window.lastSentenceKeys = []; 
+
+        for (let j = 0; j < 15; j++) {
+            let picked = null;
+            let currentKey = "";
+            let rules = document.getElementById('rule-input').value.toLowerCase();
+
+            for (let lookback = Math.min(windowMem.length, 5); lookback >= 1; lookback--) {
+                let key = windowMem.slice(-lookback).join("_");
+                let options = window.brainWeights[key] || {};
+                let sorted = Object.keys(options).sort((a, b) => options[b] - options[a]);
+                
+                for(let word of sorted) {
+                    if(rules.includes("limit 1") && res.includes(word)) continue;
+                    if(rules.includes(`ban ${key}->${word}`)) continue;
+                    picked = word;
+                    currentKey = key;
+                    break;
+                }
+                if (picked) break;
+            }
+
+            if (picked) {
+                res.push(picked);
+                window.lastSentenceKeys.push({p: currentKey, c: picked});
+                windowMem.push(picked);
+                if (windowMem.length > 5) windowMem.shift();
+            } else break;
+        }
+        
+        addLog("Johan", res.join(" ") || "...");
+        updateHeatmap();
         document.getElementById('user-in').value = "";
     }
 
     function reward(m) {
-        if(lastSentence.length < 2) return;
-        for(let i=0; i < lastSentence.length - 1; i++) {
-            let p = lastSentence[i]; let c = lastSentence[i+1];
-            if(brainWeights[p] && brainWeights[p][c]) brainWeights[p][c] *= m;
-        }
-        logChange(`Reward Applied: x${m} to sequence`);
-        updateHeatmap();
-    }
-
-    function applyCorrection() {
-        let val = document.getElementById('correction-in').value.toLowerCase().trim();
-        if(!val || !lastUserWord) return;
-        let words = val.split(" ");
-        let curr = lastUserWord;
-        words.forEach(next => {
-            let pNext = perspective(next, true);
-            if(!brainWeights[curr]) brainWeights[curr] = {};
-            brainWeights[curr][pNext] = (brainWeights[curr][pNext] || 1.0) + 5.0;
-            curr = pNext;
+        window.lastSentenceKeys.forEach(pair => {
+            if(window.brainWeights[pair.p] && window.brainWeights[pair.p][pair.c]) {
+                window.brainWeights[pair.p][pair.c] *= m;
+            }
         });
-        logChange(`Injected path from [${lastUserWord}]`);
+        logChange(`Applied x${m} multiplier to last path.`);
         updateHeatmap();
-        document.getElementById('correction-in').value = "";
     }
 
-    function exportBrain() { document.getElementById('data-io').value = JSON.stringify(brainWeights); }
-    function importBrain() { 
-        try { brainWeights = JSON.parse(document.getElementById('data-io').value); updateHeatmap(); logChange("Brain Import Successful"); }
-        catch(e) { alert("Invalid JSON"); }
-    }
-    function resetBrain() { if(confirm("Wipe?")) { brainWeights = {}; updateHeatmap(); addLog("System", "Memory Wiped."); } }
     function addLog(s, t) {
         let l = document.getElementById('log');
         let d = document.createElement('div');
@@ -220,6 +192,13 @@ function generate() {
         d.innerHTML = `<strong>${s.toUpperCase()}:</strong> ${t}`;
         l.appendChild(d); l.scrollTop = l.scrollHeight;
     }
+
+    function exportBrain() { document.getElementById('data-io').value = JSON.stringify(window.brainWeights); }
+    function importBrain() { 
+        try { window.brainWeights = JSON.parse(document.getElementById('data-io').value); updateHeatmap(); logChange("Memory Restored"); }
+        catch(e) { alert("Invalid JSON"); }
+    }
+    function resetBrain() { if(confirm("Wipe?")) { window.brainWeights = {}; updateHeatmap(); addLog("System", "Memory Wiped."); } }
 </script>
 </body>
 </html>
