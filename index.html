@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Johan v23.7: Multi-Order Command Center</title>
+    <title>Johan v23.8: Multi-Order Command Center</title>
     <style>
         :root { --bg: #050505; --neon: #00ffcc; --text: #d1d1d1; --accent: #bb86fc; --dark: #111; --good: #28a745; --bad: #dc3545; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; height: 100vh; overflow: hidden; }
@@ -126,29 +126,34 @@ function generate() {
     let words = input.replace(/[^\w\s]/g, "").split(" ").filter(w => w);
     let res = [];
     let windowMem = words.slice(-5);
+    let rules = document.getElementById('rule-input').value.toLowerCase();
 
     for (let j = 0; j < 12; j++) {
         let picked = null;
         
-        // Strategy: Search from 5-word context down to 1
         for (let lookback = Math.min(windowMem.length, 5); lookback >= 1; lookback--) {
             let key = windowMem.slice(-lookback).join("_");
             let options = window.brainWeights[key] || {};
-            let choices = Object.keys(options);
             
-            if (choices.length > 0) {
-                // Pick the best weighted word
-                picked = choices.sort((a, b) => options[b] - options[a])[0];
-                break;
+            // Sort options by weight
+            let sortedChoices = Object.keys(options).sort((a, b) => options[b] - options[a]);
+            
+            for (let choice of sortedChoices) {
+                // STRICT LOOP PREVENTION: If "limit 1" is on, don't allow word repeats
+                if (rules.includes("limit 1") && res.includes(choice)) continue;
+                
+                picked = choice;
+                break; 
             }
+            if (picked) break;
         }
 
-        // CRITICAL FIX: If no match is found, try to jump-start using any word from the user's prompt
+        // Jump-start fallback if he gets stuck
         if (!picked && j === 0) {
             for (let word of words) {
                 if (window.brainWeights[word]) {
                     let fallbacks = Object.keys(window.brainWeights[word]);
-                    picked = fallbacks.sort((a, b) => window.brainWeights[word][b] - window.brainWeights[word][a])[0];
+                    picked = fallbacks.find(f => !res.includes(f)) || fallbacks[0];
                     break;
                 }
             }
@@ -161,7 +166,7 @@ function generate() {
         } else break;
     }
     
-    addLog("Johan", res.join(" ") || "I don't know that path yet...");
+    addLog("Johan", res.join(" ") || "I'm stuck in a loop...");
     updateHeatmap();
     document.getElementById('user-in').value = "";
 }
