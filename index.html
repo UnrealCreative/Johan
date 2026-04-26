@@ -118,63 +118,45 @@
 
     function snip(p, c) { delete window.brainWeights[p][c]; updateHeatmap(); logChange(`Snipped: ${p}->${c}`); }
 
-    function generate() {
-        let input = document.getElementById('user-in').value.toLowerCase().trim();
-        if(!input) return;
-        addLog("User", input);
+function generate() {
+    let input = document.getElementById('user-in').value.toLowerCase().trim();
+    if(!input) return;
+    addLog("User", input);
+    
+    let words = input.replace(/[^\w\s]/g, "").split(" ").filter(w => w);
+    let res = [];
+    let windowMem = words.slice(-5);
+
+    for (let j = 0; j < 12; j++) {
+        let picked = null;
         
-        let words = input.replace(/[^\w\s]/g, "").split(" ").filter(w => w);
-        
-        // LEARN FROM INPUT
-        for (let size = 1; size <= 5; size++) {
-            for (let i = 0; i <= words.length - size; i++) {
-                let context = words.slice(i, i + size).join("_");
-                let nextWord = words[i + size];
-                if (nextWord) {
-                    if (!window.brainWeights[context]) window.brainWeights[context] = {};
-                    window.brainWeights[context][nextWord] = (window.brainWeights[context][nextWord] || 1.0) + 0.5;
+        for (let lookback = Math.min(windowMem.length, 5); lookback >= 1; lookback--) {
+            let key = windowMem.slice(-lookback).join("_");
+            let options = window.brainWeights[key] || {};
+            let choices = Object.keys(options);
+            
+            if (choices.length > 0) {
+                // THE FUZZY LOGIC: 80% chance for the "Best" word, 20% for a "Random" one
+                if (Math.random() > 0.2) {
+                    picked = choices.sort((a, b) => options[b] - options[a])[0];
+                } else {
+                    picked = choices[Math.floor(Math.random() * choices.length)];
                 }
+                break;
             }
         }
 
-        // GENERATE RESPONSE
-        let res = [];
-        let windowMem = words.slice(-5);
-        window.lastSentenceKeys = []; 
-
-        for (let j = 0; j < 15; j++) {
-            let picked = null;
-            let currentKey = "";
-            let rules = document.getElementById('rule-input').value.toLowerCase();
-
-            for (let lookback = Math.min(windowMem.length, 5); lookback >= 1; lookback--) {
-                let key = windowMem.slice(-lookback).join("_");
-                let options = window.brainWeights[key] || {};
-                let sorted = Object.keys(options).sort((a, b) => options[b] - options[a]);
-                
-                for(let word of sorted) {
-                    if(rules.includes("limit 1") && res.includes(word)) continue;
-                    if(rules.includes(`ban ${key}->${word}`)) continue;
-                    picked = word;
-                    currentKey = key;
-                    break;
-                }
-                if (picked) break;
-            }
-
-            if (picked) {
-                res.push(picked);
-                window.lastSentenceKeys.push({p: currentKey, c: picked});
-                windowMem.push(picked);
-                if (windowMem.length > 5) windowMem.shift();
-            } else break;
-        }
-        
-        addLog("Johan", res.join(" ") || "...");
-        updateHeatmap();
-        document.getElementById('user-in').value = "";
+        if (picked) {
+            res.push(picked);
+            windowMem.push(picked);
+            if (windowMem.length > 5) windowMem.shift();
+        } else break;
     }
-
+    
+    addLog("Johan", res.join(" ") || "...");
+    updateHeatmap();
+    document.getElementById('user-in').value = "";
+}
     function reward(m) {
         window.lastSentenceKeys.forEach(pair => {
             if(window.brainWeights[pair.p] && window.brainWeights[pair.p][pair.c]) {
